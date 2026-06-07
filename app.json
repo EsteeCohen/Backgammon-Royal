@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "Backgammon Royal",
+    "slug": "backgammon-royal",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "backgammonroyal",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a0a00"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.esteecohen.backgammonroyal",
+      "buildNumber": "1",
+      "infoPlist": {
+        "UIRequiredDeviceCapabilities": ["gamekit"],
+        "GKGameCenterEnabled": true,
+        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
+      },
+      "entitlements": {
+        "com.apple.developer.game-center": true,
+        "com.apple.developer.in-app-payments": []
+      },
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-REPLACE_WITH_YOUR_ADMOB_APP_ID"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#1a0a00",
+          "image": "./assets/images/splash.png",
+          "imageWidth": 200
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "REPLACE_WITH_YOUR_EAS_PROJECT_ID"
+      }
+    }
+  }
+}

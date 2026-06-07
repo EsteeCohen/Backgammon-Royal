@@ -1,0 +1,43 @@
+name: Feature Request
+description: Suggest a new feature or improvement
+labels: ["enhancement"]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Feature summary
+      placeholder: Short description of the feature
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Why do we need this?
+      placeholder: What problem does it solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Detailed description
+      placeholder: How should it work?
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Game Engine
+        - Solo Mode
+        - Online Mode
+        - Play with Friend
+        - Leaderboard
+        - Auth / Game Center
+        - UI / Themes
+        - Ads / IAP
+        - Help & Tutorial
+        - Other
+    validations:
+      required: true
