@@ -1,5 +1,5 @@
-import type { GameState, PlayerColor, Move } from '@/types/game';
-import { isBlocked, canBearOff, barEntryIndex, getDirection, allCheckersInHome } from './rules';
+import type { GameState, PlayerColor, Move, Point } from '@/types/game';
+import { isBlocked, canBearOff, barEntryIndex, getDirection } from './rules';
 
 /**
  * Returns all legal destinations for a checker at `from`.
@@ -10,16 +10,16 @@ export function getLegalMoves(
   from: number | 'bar'
 ): (number | 'off')[] {
   const player = state.currentPlayer;
-  const availableDice = getAvailableDice(state);
+  const available = getAvailableDice(state);
 
-  if (availableDice.length === 0) return [];
+  if (available.length === 0) return [];
 
   // Must enter from bar before any other move
   if (state.bar[player] > 0 && from !== 'bar') return [];
 
   const destinations = new Set<number | 'off'>();
 
-  for (const die of new Set(availableDice)) {
+  for (const die of new Set(available)) {
     if (from === 'bar') {
       const target = barEntryIndex(player, die);
       if (!isBlocked(state, target, player)) {
@@ -27,15 +27,15 @@ export function getLegalMoves(
       }
     } else {
       const direction = getDirection(player);
-      const target = from + direction * die;
+      const target = (from as number) + direction * die;
 
       if (target >= 0 && target <= 23) {
         if (!isBlocked(state, target, player)) {
           destinations.add(target);
         }
-      } else if (target < 0 || target > 23) {
+      } else {
         // Potential bear-off
-        if (canBearOff(state, from, die, player)) {
+        if (canBearOff(state, from as number, die, player)) {
           destinations.add('off');
         }
       }
@@ -62,7 +62,7 @@ export function applyMove(
   const player = state.currentPlayer;
   const opponent: PlayerColor = player === 'white' ? 'black' : 'white';
 
-  const board = state.board.map((p) => ({ ...p }));
+  const board: Point[] = state.board.map((p) => ({ ...p }));
   const bar = { ...state.bar };
   const off = { ...state.off };
 
@@ -70,73 +70,63 @@ export function applyMove(
   if (from === 'bar') {
     bar[player]--;
   } else {
-    board[from] = decrementPoint(board[from]);
+    board[from as number] = decrementPoint(board[from as number]);
   }
 
-  // Check if destination is a blot
+  // Place checker at destination (or bear off)
   let hit = false;
   if (to !== 'off') {
-    if (board[to].color === opponent && board[to].count === 1) {
+    const toIdx = to as number;
+    if (board[toIdx].color === opponent && board[toIdx].count === 1) {
       hit = true;
-      board[to] = { count: 0, color: null };
+      board[toIdx] = { count: 0, color: null };
       bar[opponent]++;
     }
-    board[to] = {
-      count: board[to].count + 1,
-      color: player,
-    };
+    board[toIdx] = { count: board[toIdx].count + 1, color: player };
   } else {
     off[player]++;
   }
 
   // Mark the die as used
-  const dieUsed = findAndMarkDie(state, from, to, player);
-  const usedDice = [...state.usedDice];
-  usedDice[dieUsed.dieIndex] = true;
+  const dieUsed = findDieForMove(state, from, to, player);
+  const nextUsedDice = [...state.usedDice];
+  nextUsedDice[dieUsed.dieIndex] = true;
 
-  const nextPlayer = shouldEndTurn(state, usedDice)
+  const turnEnds = nextUsedDice.every(Boolean);
+  const nextPlayer: PlayerColor = turnEnds
     ? (player === 'white' ? 'black' : 'white')
     : player;
-
-  const nextPhase = shouldEndTurn(state, usedDice) ? 'rolling' : 'moving';
-  const nextDice = shouldEndTurn(state, usedDice) ? [] : state.dice;
-  const nextUsedDice = shouldEndTurn(state, usedDice) ? [] : usedDice;
 
   const nextState: GameState = {
     ...state,
     board,
     bar,
     off,
-    usedDice,
+    usedDice: turnEnds ? [] : nextUsedDice,
+    dice: turnEnds ? [] : state.dice,
     currentPlayer: nextPlayer,
-    phase: nextPhase,
-    dice: nextDice,
-    usedDice: nextUsedDice,
+    phase: turnEnds ? 'rolling' : 'moving',
     moveCount: state.moveCount + 1,
   };
 
-  const move: Move = {
-    from,
-    to,
-    dieUsed: dieUsed.value,
-    hit,
+  return {
+    nextState,
+    move: { from, to, dieUsed: dieUsed.value, hit },
   };
-
-  return { nextState, move };
 }
 
-function decrementPoint(point: { count: number; color: string | null }) {
-  if (point.count <= 1) return { count: 0, color: null };
-  return { ...point, count: point.count - 1 };
+function decrementPoint(point: Point): Point {
+  return point.count <= 1
+    ? { count: 0, color: null }
+    : { count: point.count - 1, color: point.color };
 }
 
-function findAndMarkDie(
+function findDieForMove(
   state: GameState,
   from: number | 'bar',
   to: number | 'off',
   player: PlayerColor
 ): { dieIndex: number; value: number } {
-  const direction = player === 'white' ? -1 : 1;
   let distance: number;
 
   if (from === 'bar') {
@@ -147,14 +137,14 @@ function findAndMarkDie(
     distance = Math.abs((to as number) - (from as number));
   }
 
-  // Find first unused die matching the distance (or for bearing off, first die ≥ distance)
+  // Exact match first
   for (let i = 0; i < state.dice.length; i++) {
     if (!state.usedDice[i] && state.dice[i] === distance) {
       return { dieIndex: i, value: state.dice[i] };
     }
   }
 
-  // For bear-off with higher die value
+  // Bear-off with higher die (no exact match needed)
   for (let i = 0; i < state.dice.length; i++) {
     if (!state.usedDice[i] && state.dice[i] > distance) {
       return { dieIndex: i, value: state.dice[i] };
@@ -164,13 +154,8 @@ function findAndMarkDie(
   throw new Error(`No matching die for distance ${distance}`);
 }
 
-function shouldEndTurn(state: GameState, usedDice: boolean[]): boolean {
-  return usedDice.every(Boolean);
-}
-
 /**
  * Returns true if the current player has no legal moves at all.
- * In that case, the turn should be passed automatically.
  */
 export function hasNoLegalMoves(state: GameState): boolean {
   const player = state.currentPlayer;
