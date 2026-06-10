@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { Text, StyleSheet, SafeAreaView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS } from '@/constants/colors';
 

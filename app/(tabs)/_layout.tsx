@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Platform, Text } from 'react-native';
+import { Platform, Text, StyleSheet } from 'react-native';
 import { COLORS } from '@/constants/colors';
 
 export default function TabLayout() {
@@ -25,29 +25,34 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Play',
-          tabBarIcon: ({ color }) => <TabIcon name="🎲" color={color} />,
+          tabBarIcon: ({ color }) => <TabIcon name="🎲" active={color === COLORS.gold} />,
         }}
       />
       <Tabs.Screen
         name="leaderboard"
         options={{
           title: 'Leaderboard',
-          tabBarIcon: ({ color }) => <TabIcon name="🏆" color={color} />,
+          tabBarIcon: ({ color }) => <TabIcon name="🏆" active={color === COLORS.gold} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color }) => <TabIcon name="👤" color={color} />,
+          tabBarIcon: ({ color }) => <TabIcon name="👤" active={color === COLORS.gold} />,
         }}
       />
     </Tabs>
   );
 }
 
-function TabIcon({ name, color }: { name: string; color: string }) {
+function TabIcon({ name, active }: { name: string; active: boolean }) {
   return (
-    <Text style={{ fontSize: 22, opacity: color === COLORS.gold ? 1 : 0.5 }}>{name}</Text>
+    <Text style={active ? styles.iconActive : styles.iconInactive}>{name}</Text>
   );
 }
+
+const styles = StyleSheet.create({
+  iconActive: { fontSize: 22, opacity: 1 },
+  iconInactive: { fontSize: 22, opacity: 0.5 },
+});

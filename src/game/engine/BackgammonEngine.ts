@@ -1,4 +1,4 @@
-import type { GameState, PlayerColor, Move, GameResult, Point } from '@/types/game';
+import type { GameState, PlayerColor, GameResult } from '@/types/game';
 import { getInitialBoard } from './setup';
 import { getLegalMoves, applyMove } from './moves';
 import { checkGameResult } from './rules';

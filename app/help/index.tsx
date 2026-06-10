@@ -111,7 +111,7 @@ function SectionContent({ section }: { section: Section }) {
           <Rule title="One-Tap — Tap a checker to move it automatically using the left die first. The left die is always played first if allowed by the rules. Tap the dice to swap positions and change the order of moves." />
           <Rule title="Two-Tap — First tap the checker to move, then tap the position to move to. Allowed positions are highlighted." />
           <SubTitle>Auto-Play Forced Moves</SubTitle>
-          <Para>When only one legal move is possible, the game can play it automatically. Enable 'Autoplay Forced Moves' in Settings to speed up gameplay.</Para>
+          <Para>{"When only one legal move is possible, the game can play it automatically. Enable 'Autoplay Forced Moves' in Settings to speed up gameplay."}</Para>
           <SubTitle>Board Themes</SubTitle>
           <Para>Customize the appearance of your board with different themes. Browse available board designs and switch between themes to find your favorite look. Open the game design window from the main screen.</Para>
         </HelpSection>

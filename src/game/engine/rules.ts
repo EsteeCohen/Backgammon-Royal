@@ -32,7 +32,7 @@ export function canBearOff(state: GameState, pointIndex: number, die: number, pl
   if (distance < die) {
     // Can only bear off the checker on the highest occupied point
     // when no checker is further back
-    const [homeStart, homeEnd] = player === 'white' ? [0, 5] : [18, 23];
+    const [, homeEnd] = player === 'white' ? [0, 5] : [18, 23];
     for (let i = homeEnd; i > pointIndex; i--) {
       if (player === 'white' && i < pointIndex) break;
       if (player === 'black' && i > pointIndex) break;
